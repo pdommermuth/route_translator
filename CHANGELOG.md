@@ -1,5 +1,94 @@
 # Changelog
 
+## 15.0.0 / unreleased
+
+* [FEATURE] Drop Ruby < 3.1 support
+
+## 14.2.0 / 2024-11-08
+
+* [FEATURE] Rails 8.0 compatibility
+
+## 14.1.2 / 2024-05-27
+
+* [ENHANCEMENT] Test against Ruby 3.3
+* [ENHANCEMENT] Allow Rails 8.0 (pre)
+
+## 14.1.1 / 2023-12-19
+
+* [BUGFIX] Fix memory leak in development mode ([#301](https://github.com/enriclluelles/route_translator/pull/301))
+* [ENHANCEMENT] Update development dependencies
+
+## 14.1.0 / 2023-10-05
+
+* [FEATURE] Rails 7.1 compatibility
+
+## 14.0.1 / 2023-09-03
+
+* [BUGFIX] Fix eager load on booting ([#296](https://github.com/enriclluelles/route_translator/issues/296))
+
+## 14.0.0 / 2023-09-02
+
+* [FEATURE] BREAKING CHANGE: Force standard nested separator (Upgrade guide at [#285](https://github.com/enriclluelles/route_translator/pull/285))
+* [FEATURE] Drop Ruby 2.6 compatibility
+* [FEATURE] Drop Rails < 6.1 compatibility
+* [FEATURE] Add initializer generator
+* [ENHANCEMENT] Update development dependencies
+
+## 13.2.1 / 2023-07-28
+
+* [BUGFIX] Fix deprecation on Rails Edge
+
+## 13.2.0 / 2023-07-28
+
+* [FEATURE] Add option for standard nested separator ([#285](https://github.com/enriclluelles/route_translator/pull/285))
+* [ENHANCEMENT] Update development dependencies
+
+## 13.1.1 / 2023-07-01
+
+* [ENHANCEMENT] Better integration with ActionController::TestCase
+* [ENHANCEMENT] Remove Rails 5.1 code
+* [ENHANCEMENT] Update development dependencies
+
+## 13.1.0 / 2022-12-26
+
+* [ENHANCEMENT] Test against Ruby 3.1 and Ruby 3.2
+* [ENHANCEMENT] Better integration with ActionController::TestCase
+
+## 13.0.0 / 2022-09-01
+
+* [FEATURE] Replace Addressable gem with `URI::DEFAULT_PARSER` ([#268](https://github.com/enriclluelles/route_translator/pull/234))
+* [FEATURE] Drop Ruby 2.5 support ([#270](https://github.com/enriclluelles/route_translator/pull/270))
+* [ENHANCEMENT] Update development dependencies
+
+## 12.1.0 / 2021-12-20
+
+* [FEATURE] Add Rails 7.0 compatibility
+* [ENHANCEMENT] Update development dependencies
+
+## 12.0.0 / 2021-11-28
+
+* [BUGFIX] Fix disable_fallback behavior ([#241](https://github.com/enriclluelles/route_translator/issues/241))
+* [ENHANCEMENT] Update development dependencies
+
+## 11.0.1 / 2021-11-15
+
+* [ENHANCEMENT] Require MFA to publish gems
+* [ENHANCEMENT] Update development dependencies
+
+## 11.0.0 / 2021-09-26
+
+* [FEATURE] Drop Ruby 2.4 support
+* [FEATURE] Drop Rails 5.0 and 5.1 support
+* [ENHANCEMENT] Update development dependencies
+
+## 10.0.0 / 2021-01-16
+
+* [BUGFIX] Verify host path consistency by default ([#91](https://github.com/enriclluelles/route_translator/issues/91), [#171](https://github.com/enriclluelles/route_translator/issues/171))
+* [FEATURE] Remove the option to verify host path consistency
+* [ENHANCEMENT] Avoid duplicate routes when using host_locales ([#87](https://github.com/enriclluelles/route_translator/issues/87), [#171](https://github.com/enriclluelles/route_translator/issues/171))
+* [ENHANCEMENT] Test against Ruby 3.0.0
+* [ENHANCEMENT] Update development dependencies
+
 ## 9.0.0 / 2020-11-07
 
 * [ENHANCEMENT] Check for `empty?` instead of `any?` on available_locales array
@@ -239,6 +328,6 @@
 
 ## 4.2.0 / 2015-12-15
 
-* [ENHANCEMENT] Style update to match RuboCop recommandations
+* [ENHANCEMENT] Style update to match RuboCop recommendations
 * [BUGFIX] Permit named_params with suffix (#116)
 * [BUGFIX] Fix optional parameters with prefix (#118)

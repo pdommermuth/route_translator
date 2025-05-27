@@ -1,18 +1,16 @@
 # frozen_string_literal: true
 
 require 'active_support'
-require 'addressable/uri'
 
-require 'route_translator/extensions'
-require 'route_translator/translator'
-require 'route_translator/host'
-require 'route_translator/host_path_consistency_lambdas'
-require 'route_translator/locale_sanitizer'
+require_relative 'route_translator/extensions'
+require_relative 'route_translator/translator'
+require_relative 'route_translator/host'
+require_relative 'route_translator/version'
 
 module RouteTranslator
   extend RouteTranslator::Host
 
-  TRANSLATABLE_SEGMENT = /^([-_a-zA-Z0-9]+)(\()?/.freeze
+  TRANSLATABLE_SEGMENT = /^([-_a-zA-Z0-9]+)(\()?/
 
   DEFAULT_CONFIGURATION = {
     available_locales:                   [],
@@ -23,8 +21,7 @@ module RouteTranslator
     hide_locale:                         false,
     host_locales:                        {},
     locale_param_key:                    :locale,
-    locale_segment_proc:                 false,
-    verify_host_path_consistency:        false
+    locale_segment_proc:                 false
   }.freeze
 
   Configuration = Struct.new(*DEFAULT_CONFIGURATION.keys)
@@ -36,8 +33,10 @@ module RouteTranslator
       @config.force_locale                        = false
       @config.generate_unlocalized_routes         = false
       @config.generate_unnamed_unlocalized_routes = false
-      @config.hide_locale                         = false
+      @config.hide_locale                         = true
     end
+
+    def check_deprecations; end
   end
 
   module_function
@@ -52,6 +51,7 @@ module RouteTranslator
     yield @config if block_given?
 
     resolve_host_locale_config_conflicts if @config.host_locales.present?
+    check_deprecations
 
     @config
   end
@@ -79,5 +79,9 @@ module RouteTranslator
   def locale_from_params(params)
     locale = params[config.locale_param_key]&.to_sym
     locale if I18n.available_locales.include?(locale)
+  end
+
+  def deprecator
+    @deprecator ||= ActiveSupport::Deprecation.new(RouteTranslator::VERSION, 'RouteTranslator')
   end
 end

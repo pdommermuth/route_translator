@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'route_translator/translator/route_helpers'
-require 'route_translator/translator/path'
-require 'route_translator/route'
+require_relative 'translator/route_helpers'
+require_relative 'translator/path'
+require_relative 'route'
 
 module RouteTranslator
   module Translator
@@ -10,8 +10,10 @@ module RouteTranslator
       private
 
       def locale_from_args(args)
-        args_hash = args.detect { |arg| arg.is_a?(Hash) }
-        args_hash[:locale] if RouteTranslator.config.host_locales.present? && args_hash
+        return if RouteTranslator.config.host_locales.blank?
+
+        args_hash = args.find { |arg| arg.is_a?(Hash) }
+        args_hash&.fetch(:locale, nil)
       end
 
       def translate_name(name, locale, named_routes_names)
@@ -26,7 +28,7 @@ module RouteTranslator
         translated_options = options.dup
 
         if translated_options.exclude?(RouteTranslator.locale_param_key)
-          translated_options[RouteTranslator.locale_param_key] = RouteTranslator::LocaleSanitizer.sanitize(locale)
+          translated_options[RouteTranslator.locale_param_key] = locale.to_s
         end
 
         translated_options
@@ -53,7 +55,6 @@ module RouteTranslator
 
     def available_locales
       locales = RouteTranslator.available_locales
-      locales.concat(RouteTranslator.native_locales) if RouteTranslator.native_locales.present?
       # Make sure the default locale is translated in last place to avoid
       # problems with wildcards when default locale is omitted in paths. The
       # default routes will catch all paths like wildcard if it is translated first.
@@ -82,9 +83,7 @@ module RouteTranslator
 
       locale = if args_locale
                  args_locale.to_s.underscore
-               elsif kaller.respond_to?("#{old_name}_native_#{current_locale_name}_#{suffix}")
-                 "native_#{current_locale_name}"
-               elsif kaller.respond_to?("#{old_name}_#{current_locale_name}_#{suffix}")
+               elsif kaller.respond_to?(:"#{old_name}_#{current_locale_name}_#{suffix}")
                  current_locale_name
                else
                  I18n.default_locale.to_s.underscore

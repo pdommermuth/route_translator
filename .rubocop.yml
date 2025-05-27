@@ -1,15 +1,21 @@
-require:
+plugins:
   - rubocop-minitest
+  - rubocop-packaging
   - rubocop-performance
   - rubocop-rails
   - rubocop-rake
 
 AllCops:
-  TargetRailsVersion: 5.0
+  TargetRailsVersion: 6.1
+  TargetRubyVersion: 3.1
   NewCops: enable
+  DisplayStyleGuide: true
+  ExtraDetails: true
   Exclude:
-    - 'gemfiles/**/*'
-    - 'vendor/bundle/**/*'
+    - .git/**/*
+    - gemfiles/**/*
+    - tmp/**/*
+    - vendor/**/*
 
 Layout/HashAlignment:
   EnforcedColonStyle: table
@@ -19,7 +25,7 @@ Layout/LineLength:
   Enabled: false
 
 Metrics/AbcSize:
-  Max: 24.1 # TODO: Lower to 15
+  Max: 23 # TODO: Lower to 15
   Exclude:
     - 'test/**/*'
 
@@ -42,7 +48,7 @@ Metrics/ModuleLength:
     - 'test/**/*'
 
 Metrics/ParameterLists:
-  Max: 13
+  Max: 12
 
 Metrics/PerceivedComplexity:
   Exclude:
@@ -51,9 +57,19 @@ Metrics/PerceivedComplexity:
 Minitest/MultipleAssertions:
   Enabled: false
 
-Rails/HttpPositionalArguments:
+Rails/ActionControllerTestCase:
+  Enabled: false
+
+Rails/Delegate:
   Exclude:
-    - 'test/**/*'
+    - lib/route_translator.rb
+
+Rails/I18nLocaleAssignment:
+  Exclude:
+    - 'test/support/i18n_helper.rb'
+
+Style/ArgumentsForwarding:
+  Enabled: false
 
 Style/Documentation:
   Enabled: false

@@ -10,16 +10,18 @@ es:
     controllers:
       people:
         products:
+          products: productos_favoritos
           favourites: fans
-
+      people/products:
+        products: productos_new_favoritos
+        favourites: fans
 ru:
   routes:
     people: люди
     favourites: избранное
     controllers:
-      people:
-        products:
-          favourites: кандидаты
+      people/products:
+        favourites: кандидаты
 
 de-AT:
   routes:

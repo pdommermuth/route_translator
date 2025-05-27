@@ -15,29 +15,17 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/enriclluelles/route_translator'
   spec.license       = 'MIT'
 
+  spec.metadata['rubygems_mfa_required'] = 'true'
+
   spec.metadata['bug_tracker_uri'] = 'https://github.com/enriclluelles/route_translator/issues'
   spec.metadata['changelog_uri'] = 'https://github.com/enriclluelles/route_translator/blob/master/CHANGELOG.md'
   spec.metadata['source_code_uri'] = 'https://github.com/enriclluelles/route_translator'
 
-  spec.files         = `git ls-files -z -- {CHANGELOG.md,LICENSE,README.md,lib}`.split("\x0")
+  spec.files         = Dir.glob('{CHANGELOG.md,LICENSE,README.md,lib/**/*.rb}', File::FNM_DOTMATCH)
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 2.4'
+  spec.required_ruby_version = '>= 3.1'
 
-  spec.add_runtime_dependency 'actionpack', '>= 5.0.0.1', '< 6.2'
-  spec.add_runtime_dependency 'activesupport', '>= 5.0.0.1', '< 6.2'
-  spec.add_runtime_dependency 'addressable', '~> 2.7'
-
-  spec.add_development_dependency 'appraisal', '~> 2.3'
-  spec.add_development_dependency 'byebug', '>= 10.0', '< 12'
-  spec.add_development_dependency 'coveralls_reborn', '~> 0.19.0'
-  spec.add_development_dependency 'minitest', '~> 5.14'
-  spec.add_development_dependency 'rails', '>= 5.0.0.1', '< 6.2'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rubocop', '~> 1.6'
-  spec.add_development_dependency 'rubocop-minitest', '~> 0.10.1'
-  spec.add_development_dependency 'rubocop-performance', '~> 1.9'
-  spec.add_development_dependency 'rubocop-rails', '~> 2.9'
-  spec.add_development_dependency 'rubocop-rake', '~> 0.5.1'
-  spec.add_development_dependency 'simplecov', '>= 0.18.5', '< 0.21'
+  spec.add_dependency 'actionpack', '>= 6.1'
+  spec.add_dependency 'activesupport', '>= 6.1'
 end

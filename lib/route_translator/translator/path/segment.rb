@@ -9,7 +9,7 @@ module RouteTranslator
 
           def fallback_options(str, locale)
             if RouteTranslator.config.disable_fallback && locale.to_s != I18n.default_locale.to_s
-              { scope: :routes, fallback: true }
+              { scope: :routes, fallback: false }
             else
               { scope: :routes, default: str }
             end
@@ -24,18 +24,17 @@ module RouteTranslator
             handler = proc { |exception| exception }
             opts    = { locale: locale, scope: scope }
 
-            if I18n.t(str, **opts.merge(exception_handler: handler)).is_a?(I18n::MissingTranslation)
-              I18n.t str, **opts.merge(fallback_options(str, locale))
+            if I18n.t(str, **opts, exception_handler: handler).is_a?(I18n::MissingTranslation)
+              I18n.t! str, **opts, **fallback_options(str, locale)
             else
               I18n.t str, **opts
             end
           end
 
           def translate_string(str, locale, scope)
-            sanitized_locale = RouteTranslator::LocaleSanitizer.sanitize(locale)
-            translated_resource = translate_resource(str, sanitized_locale, scope)
+            translated_resource = translate_resource(str, locale.to_s, scope)
 
-            Addressable::URI.normalize_component translated_resource
+            URI::DEFAULT_PARSER.escape translated_resource
           end
         end
 

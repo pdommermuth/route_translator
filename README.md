@@ -1,8 +1,7 @@
 # RouteTranslator
 
 [![Gem Version](https://badge.fury.io/rb/route_translator.svg)](https://badge.fury.io/rb/route_translator)
-[![SemVer](https://api.dependabot.com/badges/compatibility_score?dependency-name=route_translator&package-manager=bundler&version-scheme=semver)](https://dependabot.com/compatibility-score.html?dependency-name=route_translator&package-manager=bundler&version-scheme=semver)
-[![Build Status](https://travis-ci.org/enriclluelles/route_translator.svg?branch=master)](https://travis-ci.org/enriclluelles/route_translator)
+[![Build Status](https://github.com/enriclluelles/route_translator/actions/workflows/ruby.yml/badge.svg)](https://github.com/enriclluelles/route_translator/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1c369ce6147724b353fc/maintainability)](https://codeclimate.com/github/enriclluelles/route_translator/maintainability)
 [![Coverage Status](https://coveralls.io/repos/github/enriclluelles/route_translator/badge.svg?branch=master)](https://coveralls.io/github/enriclluelles/route_translator?branch=master)
 
@@ -10,9 +9,7 @@ RouteTranslator is a gem to allow you to manage the translations of your app rou
 
 It started as a fork of the awesome [translate_routes](https://github.com/raul/translate_routes) plugin by [Raúl Murciano](https://github.com/raul).
 
-Right now it works with Rails 5.x and Rails 6.x
-
-
+Right now it works with Rails 6.1, 7.x, and 8.0
 
 ## Quick Start
 
@@ -28,7 +25,7 @@ Right now it works with Rails 5.x and Rails 6.x
     end
     ```
 
-    The output of `rake routes.rb` would be:
+    The output of `bundle exec rails routes` would be:
 
     ```
         admin_cars GET    /admin/cars(.:format)          admin/cars#index
@@ -55,7 +52,13 @@ Right now it works with Rails 5.x and Rails 6.x
 
     And execute `bundle install`
 
-3.  Wrap the groups of routes that you want to translate inside a `localized` block:
+3.  Generate the default initializer:
+
+    ```sh
+    bundle exec rails g route_translator:install
+    ```
+
+4.  Wrap the groups of routes that you want to translate inside a `localized` block:
 
     ```ruby
     Rails.application.routes.draw do
@@ -86,7 +89,7 @@ Right now it works with Rails 5.x and Rails 6.x
         pricing: prix
     ```
 
-4.  Your routes are translated! Here's the output of your `rake routes` now:
+5.  Your routes are translated! Here's the output of your `bundle exec rails routes` now:
 
     ```
             Prefix Verb   URI Pattern                     Controller#Action
@@ -134,7 +137,7 @@ Right now it works with Rails 5.x and Rails 6.x
 
     In :production environment, you should either set `config.i18n.fallbacks = false` or set up translations for your routes in every languages.
 
-5.  If you want to set `I18n.locale` from the url parameter locale, add
+6.  If you want to set `I18n.locale` from the url parameter locale, add
     the following line in your `ApplicationController` or in the controllers
     that have translated content:
 
@@ -143,7 +146,6 @@ Right now it works with Rails 5.x and Rails 6.x
     ```
 
     Note: you might be tempted to use `before_action` instead of `around_action`: just don't. That could lead to [thread-related issues](https://github.com/enriclluelles/route_translator/issues/44).
-
 
 ### Changing the Language
 
@@ -155,10 +157,9 @@ link_to url_for(locale: 'es'), hreflang: 'es', rel: 'alternate'
 
 Although locales are stored by Rails as a symbol (`:es`), when linking to a page in a different locale you need to use a string (`'es'`). Otherwise, instead of a namespaced route (`/es/my-route`) you will get a parameterized route (`/my-route?locale=es`).
 
-If the page contains a localized slug, the above snippet does not work and a custom implementation is neede.
+If the page contains a localized slug, the above snippet does not work and a custom implementation is needed.
 
 More information at [Generating translated URLs](https://github.com/enriclluelles/route_translator/wiki/Generating-translated-URLs)
-
 
 ### Namespaces
 
@@ -199,7 +200,7 @@ You can translate a namespace route by either its `name` or `path` option:
         sold: vendues
     ```
 
-4.  Your namespaces are translated! Here's the output of your `rake routes` now:
+4.  Your namespaces are translated! Here's the output of your `bundle exec rails routes` now:
 
     ```
                Prefix Verb URI Pattern                           Controller#Action
@@ -210,7 +211,6 @@ You can translate a namespace route by either its `name` or `path` option:
     sold_cars_cars_es GET  /es/vendidos/coches(.:format)         sold_cars/cars#index {:locale=>"es"}
     sold_cars_cars_en GET  /sold/cars(.:format)                  sold_cars/cars#index {:locale=>"en"}
     ```
-
 
 ### Inflections
 
@@ -254,8 +254,6 @@ edit_category_en GET    /categories/:id/edit(.:format)    categories#edit {:loca
                  DELETE /categories/:id(.:format)         categories#destroy {:locale=>"en"}
 ```
 
-
-
 ## Configuration
 
 You can configure RouteTranslator via an initializer or using the different environment config files.
@@ -267,22 +265,19 @@ RouteTranslator.config do |config|
 end
 ```
 
-
 ### Available Configurations
 
 | Option | Description | Default |
 | ------ | ----------- |-------- |
-| `available_locales` | Limits the locales for which URLs should be generated for. Accepts an array of strings or symbols. When empty, translations will be generated for all `I18n.available_locales` | `[]` |
-| `disable_fallback` | Creates routes only for locales that have translations. For example, if we have `/examples` and a translation is not provided for `es`, the route helper of `examples_es` will not be created. Useful when one uses this with a locale route constraint, so non-`es` routes can return a `404` on a Spanish website | `false` |
-| `force_locale` |  Forces the locale to be added to all generated route paths, even for the default locale |  `false` |
-| `generate_unlocalized_routes` | Adds translated routes without deleting original unlocalized versions. **Note:** Autosets `force_locale` to `true` | `false` |
-| `generate_unnamed_unlocalized_routes` | Adds the behavior of `force_locale`, but with a named default route which behaves as if `generate_unlocalized_routes` was `true`. `root_path` will redirect to `/en` or `/es`, depending on the value of `I18n.locale` | `false` |
-| `hide_locale` | Forces the locale to be hidden on generated route paths | `false` |
-| `host_locales` | Sets `I18n.locale` based on `request.host`. Useful for apps accepting requests from more than one domain. See below for more details | `{}` |
+| `available_locales` | Limit the locales for which URLs should be generated for. Accepts an array of strings or symbols. When empty, translations will be generated for all `I18n.available_locales` | `[]` |
+| `disable_fallback` | Create routes only for locales that have translations. For example, if we have `/examples` and a translation is not provided for `es`, the route helper of `examples_es` will not be created. Useful when one uses this with a locale route constraint, so non-`es` routes can return a `404` on a Spanish website | `false` |
+| `force_locale` |  Force the locale to be added to all generated route paths, even for the default locale |  `false` |
+| `generate_unlocalized_routes` | Add translated routes without deleting original unlocalized versions. **Note:** Autosets `force_locale` to `true` | `false` |
+| `generate_unnamed_unlocalized_routes` | Add the behavior of `force_locale`, but with a named default route which behaves as if `generate_unlocalized_routes` was `true`. `root_path` will redirect to `/en` or `/es`, depending on the value of `I18n.locale` | `false` |
+| `hide_locale` | Force the locale to be hidden on generated route paths | `false` |
+| `host_locales` | Set `I18n.locale` based on `request.host`. Useful for apps accepting requests from more than one domain. See below for more details | `{}` |
 | `locale_param_key` | The param key used to set the locale to the newly generated routes | `:locale` |
 | `locale_segment_proc` | The locale segment of the url will by default be `locale.to_s.downcase`. You can supply your own mechanism via a Proc that takes `locale` as an argument, e.g. `->(locale) { locale.to_s.upcase }` | `false` |
-| `verify_host_path_consistency` | Forces a matching of the host associated locale with the translated path locale as part of the route definition. By default, if you use different hosts to translate your application, all translated paths will work on all hosts | `false` |
-
 
 ### Host-based Locale
 
@@ -313,19 +308,18 @@ RouteTranslator.config.host_locales = { 'russia.*' => :ru, '*.com'    => :en } #
 RouteTranslator.config.host_locales = { '*.com'    => :en, 'russia.*' => :ru } # 'russia.com' will have locale :en
 ```
 
-If `host_locales` option is set, the following options will be forced (even if you set to true):
+If `host_locales` option is set, the following options will be forced:
 
 ```ruby
 @config.force_locale                        = false
 @config.generate_unlocalized_routes         = false
 @config.generate_unnamed_unlocalized_routes = false
-@config.hide_locale                         = false
+@config.hide_locale                         = true
 ```
 
 This is to avoid odd behaviour brought about by route conflicts and because `host_locales` forces and hides the host-locale dynamically.
 
 NOTE: locale from parameters has priority over the one from hosts.
-
 
 ### Translations for similar routes with different namespaces
 
@@ -344,9 +338,8 @@ es:
   routes:
     favourites: favoritos
     controllers:
-      people:
-        products:
-          favourites: fans
+      people/products:
+        favourites: fans
 ```
 
 Routes will be translated as in:
@@ -356,8 +349,29 @@ people_products_favourites_es GET  /people/products/fans(.:format)       people/
        products_favourites_es GET  /products/favoritos(.:format)         products#favourites {:locale=>"es"}
 ```
 
-The gem will lookup translations under `controllers` scope first and then lookup translations under `routes` scope.
+It is also possible to translated resources scoped into a namespace. Example:
 
+```ruby
+namespace :people do
+  resources :products, only: :index
+end
+```
+
+```yml
+es:
+  routes:
+    controllers:
+      people/products:
+        products: productos_favoritos
+```
+
+Routes will be translated as in:
+
+```
+people_products_es GET  /people/productos_favoritos(.:format)       people/products#index {:locale=>"es"}
+```
+
+The gem will lookup translations under `controllers` scope first and then lookup translations under `routes` scope.
 
 ### Change locale parameter position in the path
 
@@ -370,8 +384,6 @@ scope ':country/:locale' do
   end
 end
 ```
-
-
 
 ## Testing
 Testing your controllers with routes-translator is easy, just add a locale parameter as `String` for your localized routes. Otherwise, an `ActionController::UrlGenerationError` will raise.
@@ -386,8 +398,6 @@ describe 'GET index' do
   end
 end
 ```
-
-
 
 ## Contributing
 

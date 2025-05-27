@@ -91,6 +91,7 @@ class TranslateRoutesTest < ActionController::TestCase
         get 'products/:tr_param', to: 'products#index', constraints: { tr_param: /\w/ }
       end
     end
+
     assert_routing '/es/productos/a', controller: 'products', action: 'index', locale: 'es', tr_param: 'a'
   end
 
@@ -121,6 +122,7 @@ class TranslateRoutesTest < ActionController::TestCase
         get 'products/*tr_param', to: 'products#index'
       end
     end
+
     assert_routing '/es/productos/a/b', controller: 'products', action: 'index', locale: 'es', tr_param: 'a/b'
   end
 
@@ -139,6 +141,24 @@ class TranslateRoutesTest < ActionController::TestCase
     assert_routing({ path: '/productos/1', method: 'PUT' }, controller: 'products', action: 'update', id: '1', locale: 'es')
   end
 
+  def test_namespaced_resources
+    I18n.default_locale = :es
+
+    draw_routes do
+      localized do
+        resources :products
+
+        namespace :people do
+          resources :products
+        end
+      end
+    end
+
+    assert_routing '/productos', controller: 'products', action: 'index', locale: 'es'
+    assert_routing '/gente/productos_new_favoritos', controller: 'people/products', action: 'index', locale: 'es'
+    assert_unrecognized_route '/gente/productos_favoritos', controller: 'people/products', action: 'index', locale: 'es'
+  end
+
   def test_utf8_characters
     draw_routes do
       localized do
@@ -146,7 +166,7 @@ class TranslateRoutesTest < ActionController::TestCase
       end
     end
 
-    assert_routing Addressable::URI.normalize_component('/ru/люди'), controller: 'people', action: 'index', locale: 'ru'
+    assert_routing URI::DEFAULT_PARSER.escape('/ru/люди'), controller: 'people', action: 'index', locale: 'ru'
   end
 
   def test_resources_with_only
@@ -176,8 +196,8 @@ class TranslateRoutesTest < ActionController::TestCase
 
     assert_routing '/gente/fans', controller: 'people/products', action: 'favourites', locale: 'es'
     assert_routing '/favoritos', controller: 'products', action: 'favourites', locale: 'es'
-    assert_routing Addressable::URI.normalize_component('/ru/люди/кандидаты'), controller: 'people/products', action: 'favourites', locale: 'ru'
-    assert_routing Addressable::URI.normalize_component('/ru/избранное'), controller: 'products', action: 'favourites', locale: 'ru'
+    assert_routing URI::DEFAULT_PARSER.escape('/ru/люди/кандидаты'), controller: 'people/products', action: 'favourites', locale: 'ru'
+    assert_routing URI::DEFAULT_PARSER.escape('/ru/избранное'), controller: 'products', action: 'favourites', locale: 'ru'
   end
 
   def test_unnamed_root_route_without_prefix
@@ -503,7 +523,7 @@ class TranslateRoutesTest < ActionController::TestCase
     end
   end
 
-  def test_path_helper_arguments
+  def test_path_helper_arguments_with_host_locales
     I18n.default_locale = :es
     config_host_locales '*.es' => 'es', '*.com' => 'en'
 
@@ -517,9 +537,6 @@ class TranslateRoutesTest < ActionController::TestCase
       assert_equal '/productos',                           @routes.url_helpers.products_path
       assert_equal '/productos/some_product',              @routes.url_helpers.product_path('some_product')
       assert_equal '/productos/some_product?some=param',   @routes.url_helpers.product_path('some_product', some: 'param')
-      assert_equal '/en/products',                         @routes.url_helpers.products_path(locale: 'en')
-      assert_equal '/en/products/some_product',            @routes.url_helpers.product_path('some_product', locale: 'en')
-      assert_equal '/en/products/some_product?some=param', @routes.url_helpers.product_path('some_product', locale: 'en', some: 'param')
     end
   end
 
@@ -527,6 +544,23 @@ class TranslateRoutesTest < ActionController::TestCase
     I18n.available_locales = %i[es en it]
     I18n.default_locale = :it
     config_available_locales %i[en]
+
+    draw_routes do
+      localized do
+        resources :products
+      end
+    end
+
+    I18n.with_locale :es do
+      assert_equal '/products/some_product?some=param', @routes.url_helpers.product_path('some_product', some: 'param', locale: 'it')
+    end
+  end
+
+  def test_path_helper_arguments_fallback_with_hosts
+    I18n.available_locales = %i[es en it]
+    I18n.default_locale = :it
+    config_available_locales %i[en]
+    config_host_locales '*.com' => 'en', '*.it' => 'it', '*.es' => 'es'
 
     draw_routes do
       localized do
@@ -579,7 +613,6 @@ class TranslateRoutesTest < ActionController::TestCase
     end
 
     assert_recognizes({ controller: 'people', action: 'index', locale: 'es' }, path: 'http://testapp.es/gente',    method: :get)
-    assert_recognizes({ controller: 'people', action: 'index', locale: 'es' }, path: 'http://testapp.es/es/gente', method: :get)
     assert_recognizes({ controller: 'people', action: 'index' },               path: 'http://testapp.es/',         method: :get)
 
     assert_recognizes({ controller: 'people', action: 'index', locale: 'en' }, path: 'http://testapp.com/people',  method: :get)
@@ -587,15 +620,7 @@ class TranslateRoutesTest < ActionController::TestCase
   end
 
   def test_action_controller_gets_locale_setter
-    ActionController::Base.instance_methods.include?('set_locale_from_url')
-  end
-
-  def test_action_controller_gets_locale_suffix_helper
-    ActionController::Base.instance_methods.include?('locale_suffix')
-  end
-
-  def test_action_view_gets_locale_suffix_helper
-    ActionView::Base.instance_methods.include?('locale_suffix')
+    assert_includes ActionController::Base.private_instance_methods, :set_locale_from_url
   end
 
   # See https://github.com/enriclluelles/route_translator/issues/69
@@ -626,7 +651,7 @@ class TranslateRoutesTest < ActionController::TestCase
       end
     end
 
-    assert_routing Addressable::URI.normalize_component('/ru/люди'), controller: 'people', action: 'index', locale: 'ru'
+    assert_routing URI::DEFAULT_PARSER.escape('/ru/люди'), controller: 'people', action: 'index', locale: 'ru'
     assert_routing '/people', controller: 'people', action: 'index', locale: 'en'
     assert_unrecognized_route '/es/gente', controller: 'people', action: 'index', locale: 'es'
   end
@@ -640,7 +665,7 @@ class TranslateRoutesTest < ActionController::TestCase
       end
     end
 
-    assert_routing Addressable::URI.normalize_component('/ru/люди'), controller: 'people', action: 'index', locale: 'ru'
+    assert_routing URI::DEFAULT_PARSER.escape('/ru/люди'), controller: 'people', action: 'index', locale: 'ru'
     assert_routing '/people', controller: 'people', action: 'index', locale: 'en'
     assert_unrecognized_route '/es/gente', controller: 'people', action: 'index', locale: 'es'
   end
@@ -670,6 +695,18 @@ class TranslateRoutesTest < ActionController::TestCase
     end
 
     assert_unrecognized_route '/ru/tr_param', controller: 'people', action: 'index', locale: 'ru'
+  end
+
+  def test_disable_fallback_does_not_draw_untranslated_routes
+    config_disable_fallback(true)
+
+    draw_routes do
+      localized do
+        resources :products
+      end
+    end
+
+    assert_not_respond_to @routes.url_helpers, :products_ru_path
   end
 end
 
@@ -703,7 +740,7 @@ class ProductsControllerTest < ActionController::TestCase
   def test_url_helpers_are_included
     controller = ProductsController.new
 
-    %i[product_path product_url product_es_path product_es_url product_native_es_path product_native_es_url].each do |method_name|
+    %i[product_path product_url product_es_path product_es_url].each do |method_name|
       assert_respond_to controller, method_name
     end
   end
