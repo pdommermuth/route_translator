@@ -4,7 +4,7 @@ module RouteTranslator
   module Translator
     module RouteHelpers
       TEST_CASE_HOOKS = %i[
-        action_controller_test_case action_mailer_test_case action_view_test_case
+        action_mailer_test_case action_view_test_case
       ].freeze
 
       module_function
